@@ -4,10 +4,12 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 # from langchain.embeddings.openai import OpenAIEmbeddings
 from langchain_community.embeddings import OpenAIEmbeddings
 from langchain.vectorstores import FAISS
+from langchain.chains.question_answering import load_qa_chain
+from langchain_community.chat_models import ChatOpenAI
 
 
 
-OPENAI_API_KEY = "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"
+OPENAI_API_KEY = "sk-proj-hfjbhalihna456sSTHsth8gdfdffddghLHFI-PrSI9SEa8_Txw0U9WtejgUFZrbeDFK56HOOeuw2xghoTxH7h7JNahR2R3nGnZaQPhEA"
 
 # Upload PDF File
 
@@ -37,10 +39,34 @@ if file is not None:
     chunks = text_splitter.split_text(text)
     # st.write(chunks)
 
-# Generating Embeddings
+    # Generating Embeddings
 
-embeddings = OpenAIEmbeddings(openai_api_key = OPENAI_API_KEY)
+    embeddings = OpenAIEmbeddings(openai_api_key = OPENAI_API_KEY)
 
-# Creating Vector Store
+    # Creating Vector Store
 
-vector_store = FAISS.from_texts(chunks, embeddings)
+    vector_store = FAISS.from_texts(chunks, embeddings)
+
+    # Get user Question
+
+    user_question = st.text_input('Enter your Question')
+
+    # Do similarity Search
+
+    if user_question:
+        match = vector_store.similarity_search(user_question)
+        st.write(match)
+
+        # Define the llm
+        llm = ChatOpenAI(
+            openai_api_key = OPENAI_API_KEY,
+            temprature = 0,
+            max_tokens = 1000,
+            model_name = 'gpt-4.5-turbo'
+        )
+
+        # Output Result
+
+        chain = load_qa_chain(llm, chain_type='stuff')
+        response = chain.run(input_documents = match, question = user_question)
+        st.write(response)
