@@ -1,2 +1,2 @@
 # ChatBot-Python
-ChatBot Made usin g ChatGPT API with Python
+ChatBot Made using ChatGPT API with Python
